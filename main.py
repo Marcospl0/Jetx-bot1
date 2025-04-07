@@ -3,6 +3,7 @@ import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import random
+import asyncio
 
 # Inicializa variáveis de acertos e erros
 acertos = 0
@@ -62,20 +63,14 @@ async def ativar_sinais(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.job_queue.run_repeating(enviar_sinal, interval=30, first=5, chat_id=update.message.chat_id)
 
 # Inicialização do bot
-async def main():
-    logging.basicConfig(level=logging.INFO)
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
-    app = ApplicationBuilder().token(token).build()
+logging.basicConfig(level=logging.INFO)
+token = os.getenv("TELEGRAM_BOT_TOKEN")
+app = ApplicationBuilder().token(token).build()
 
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("taxas", taxas))
-    app.add_handler(CommandHandler("resetartaxas", resetar_taxas))
-    app.add_handler(CommandHandler("sinais", ativar_sinais))
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("taxas", taxas))
+app.add_handler(CommandHandler("resetartaxas", resetar_taxas))
+app.add_handler(CommandHandler("sinais", ativar_sinais))
 
-    print("Bot iniciado...")
-    await app.run_polling()
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
-
+print("Bot iniciado...")
+app.run_polling()  # ← Sem asyncio.run()
