@@ -1,25 +1,30 @@
-class StatsManager:
-    def __init__(self):
-        self.total = 0
-        self.acertos = 0
-        self.erros = 0
+import json
+import os
 
-    def registrar_resultado(self, correto: bool):
-        self.total += 1
-        if correto:
-            self.acertos += 1
-        else:
-            self.erros += 1
+CAMINHO = "stats.json"
 
-    def obter_taxa_acerto(self):
-        if self.total == 0:
-            return 0.0
-        return round((self.acertos / self.total) * 100, 2)
+def carregar_dados():
+    if not os.path.exists(CAMINHO):
+        with open(CAMINHO, "w") as f:
+            json.dump({"acertos": 0, "erros": 0}, f)
+    with open(CAMINHO, "r") as f:
+        return json.load(f)
 
-    def gerar_resumo(self):
-        return (
-            f"Rodadas analisadas: {self.total}\n"
-            f"Acertos: {self.acertos}\n"
-            f"Erros: {self.erros}\n"
-            f"Taxa de acerto: {self.obter_taxa_acerto()}%"
-        )
+def salvar_dados(data):
+    with open(CAMINHO, "w") as f:
+        json.dump(data, f)
+
+def registrar_resultado(resultado_real):
+    data = carregar_dados()
+    previsao = 1.80
+    if resultado_real >= previsao:
+        data["acertos"] += 1
+    else:
+        data["erros"] += 1
+    salvar_dados(data)
+
+def obter_taxas():
+    data = carregar_dados()
+    total = data["acertos"] + data["erros"]
+    taxa = round((data["acertos"] / total) * 100, 2) if total > 0 else 0
+    return data["acertos"], data["erros"], taxa
